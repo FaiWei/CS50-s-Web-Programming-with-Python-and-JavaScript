@@ -1,0 +1,42 @@
+$b: black;
+%texc {
+    text-align: center;
+}
+
+.mbold {
+    @extend %texc;
+    color: $b;   
+    font-weight: bold;
+}
+
+.disabled {
+    font-weight: bold;
+    color: $b;         
+}
+
+.navbarcustom {
+    background-color: rgba(222, 250, 233, 1);
+}
+
+td, th {
+    @extend %texc;
+}
+
+#textdec {
+    font-family: Geneva;
+}
+
+@media (min-width: 570px) {
+    body {
+        >footer {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 1030;
+        }
+    }
+    .dropdown-menu {
+        background-color: rgba(222, 250, 233, 1);
+    }
+} 
