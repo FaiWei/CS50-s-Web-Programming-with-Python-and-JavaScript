@@ -6,7 +6,7 @@
 
 {% block main %}
 
-    <form id="myForm" action="/register" method="post" onsubmit="mySubmitFunction(event)">
+    <form id="myForm" action="/register" method="post">
         <div class="form-group">
             <input id="#username" autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
         </div>
@@ -18,25 +18,4 @@
         </div>
         <button id="#regBtn" class="btn btn-primary" type="submit">Register</button>
     </form>
-    <script>
-        function mySubmitFunction(e) {
-            alert('wew');
-            e.preventDefault();
-            var flip = document.getElementById("#username");
-            username = flip.value;
-
-            $.get('/check?username=' + username, function(response){
-
-                if (response == false) {
-                    alert('Username taken!');
-                    document.getElementById('form').reset();
-                    $('#username').focus();
-                }
-                else
-                {
-                    document.getElementById("myForm").submit();
-                }
-            });
-        }
-    </script>
 {% endblock %}
