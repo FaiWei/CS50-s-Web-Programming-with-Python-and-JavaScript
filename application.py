@@ -99,3 +99,51 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    # Forget any user_id
+    session.clear()
+
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+
+        # Ensure username was submitted
+        if not request.form.get("username"):
+            return apology("must provide username", 400)
+
+        name = request.form.get("username")
+
+        exists_username = db.execute("SELECT username FROM users where username = :username", username=name)
+        if exists_username:
+            return apology("username already exists", 400)
+
+        # Ensure password was submitted
+        elif not request.form.get("password"):
+            return apology("must provide password", 400)
+
+        # Ensure password check was submitted
+        elif not request.form.get("confirmation"):
+            return apology("must provide password check", 400)
+
+        # Ensure password check was submitted
+        elif request.form.get("confirmation") != request.form.get("password"):
+            return apology("passwords do not match", 400)
+
+        # insert new info in db
+        hash = generate_password_hash(request.form.get("password"))
+        db.execute(
+            "INSERT INTO users(username,hash) VALUES(:username, :hash)",
+            username=name, hash=hash)
+
+        # log into session
+        session.get("user_id")
+
+        # Redirect user to home page
+        return redirect("/")
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    else:
+        return render_template("register.html")
