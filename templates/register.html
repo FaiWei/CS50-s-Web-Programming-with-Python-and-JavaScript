@@ -6,7 +6,6 @@
 
 {% block main %}
 
-
     <form id="myForm" action="/register" method="post" onsubmit="mySubmitFunction(event)">
         <div class="form-group">
             <input id="#username" autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
@@ -20,8 +19,8 @@
         <button id="#regBtn" class="btn btn-primary" type="submit">Register</button>
     </form>
     <script>
-
         function mySubmitFunction(e) {
+            alert('wew');
             e.preventDefault();
             var flip = document.getElementById("#username");
             username = flip.value;
@@ -37,9 +36,7 @@
                 {
                     document.getElementById("myForm").submit();
                 }
-
             });
         }
-
     </script>
 {% endblock %}
