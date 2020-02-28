@@ -1,5 +1,4 @@
 import os
-import csv
 
 from flask import Flask, session, redirect, render_template, request
 from flask_session import Session
@@ -69,9 +68,10 @@ def index():
     """Show main page with search"""
 
     # derive username and cash from database
-    username = db.execute("SELECT * FROM users \
-                        WHERE id = :id", id=session["user_id"])
-    return render_template("index.html", username=username[0]["username"])
+    username = db.execute("SELECT username FROM practice.users \
+                        WHERE id = :id", {"id": session["user_id"]}).fetchone()
+
+    return render_template("index.html", username=username.username)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -93,15 +93,16 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = :username",
-                          username=request.form.get("username"))
+        row = db.execute("SELECT * FROM practice.users WHERE username = :username",
+                          {"username":request.form.get("username")}).fetchone()
+
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+        if row is None or not check_password_hash(row.password, request.form.get("password")):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = row.id
 
         # Redirect user to home page
         return redirect("/")
@@ -110,6 +111,15 @@ def login():
     else:
         return render_template("login.html")
 
+@app.route("/logout")
+def logout():
+    """Log user out"""
+
+    # Forget any user_id
+    session.clear()
+
+    # Redirect user to login form
+    return redirect("/")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -139,7 +149,7 @@ def register():
         # Ensure password check was submitted
         elif request.form.get("confirmation") != request.form.get("password"):
             return apology("passwords do not match", 400)
-        print("third stage")
+
         # insert new info in db
         passhash = generate_password_hash(request.form.get("password"))
         db.execute(
@@ -148,7 +158,8 @@ def register():
         db.commit()
 
         # log into session
-        session.get("user_id")
+        fetchid = db.execute("SELECT id FROM practice.users WHERE username = :username", {"username":name}).fetchone()
+        session["user_id"] = fetchid.id
 
         # Redirect user to home page
         return redirect("/")
