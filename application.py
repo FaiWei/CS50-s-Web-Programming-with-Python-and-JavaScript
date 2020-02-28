@@ -119,17 +119,18 @@ def register():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
+        print("zero stage")
         # Ensure username was submitted
         if not request.form.get("username"):
             return apology("must provide username", 400)
 
         name = request.form.get("username")
-
-        exists_username = db.execute("SELECT username FROM users where username = :username", username=name)
+        print("first stage")
+        exists_username = db.execute("SELECT username FROM users WHERE username = :username", {"username":name}).fetchone()
+        print("second stage")
         if exists_username:
             return apology("username already exists", 400)
-
+        print("third stage")
         # Ensure password was submitted
         elif not request.form.get("password"):
             return apology("must provide password", 400)
