@@ -119,35 +119,33 @@ def register():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-        print("zero stage")
+
         # Ensure username was submitted
         if not request.form.get("username"):
             return apology("must provide username", 400)
 
         name = request.form.get("username")
-        print("first stage")
-        exists_username = db.execute("SELECT username FROM users WHERE username = :username", {"username":name}).fetchone()
-        print("second stage")
+
+        exists_username = db.execute("SELECT username FROM practice.users WHERE username = :username", {"username":name}).fetchone()
+
         if exists_username:
             return apology("username already exists", 400)
-        print("third stage")
         # Ensure password was submitted
         elif not request.form.get("password"):
             return apology("must provide password", 400)
-
         # Ensure password check was submitted
         elif not request.form.get("confirmation"):
             return apology("must provide password check", 400)
-
         # Ensure password check was submitted
         elif request.form.get("confirmation") != request.form.get("password"):
             return apology("passwords do not match", 400)
-
+        print("third stage")
         # insert new info in db
-        hash = generate_password_hash(request.form.get("password"))
+        passhash = generate_password_hash(request.form.get("password"))
         db.execute(
-            "INSERT INTO users(username,hash) VALUES(:username, :hash)",
-            username=name, hash=hash)
+            "INSERT INTO practice.users (username,password) VALUES (:username, :password)",
+            {"username": name, "password": passhash})
+        db.commit()
 
         # log into session
         session.get("user_id")
