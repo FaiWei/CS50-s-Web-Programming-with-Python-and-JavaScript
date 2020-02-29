@@ -1,5 +1,8 @@
 import os
 
+#set FLASK_APP=application.py
+#set DATABASE_URL=
+
 from flask import Flask, session, redirect, render_template, request
 from flask_session import Session
 from sqlalchemy import create_engine
@@ -62,17 +65,41 @@ def login_required(f):
 
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    """Show main page with search"""
+    """Show main page with search or search results"""  
 
-    # derive username and cash from database
-    username = db.execute("SELECT username FROM practice.users \
-                        WHERE id = :id", {"id": session["user_id"]}).fetchone()
+    if request.method == "POST":
+        #get user search request
+        search_request = request.form.get("search_request")
+        request_splitted = search_request.split()
+        print(type(request_splitted))
+        print(type(request_splitted[0]))
+        print(request_splitted[0])
+        liked_req = phraseforlike(request_splitted)
+        print(liked_req)
+        # derive search results by to_tsvector-to_tsquery
+        smart_req = db.execute("SELECT * FROM practice.books WHERE to_tsvector(title) || to_tsvector(author) || to_tsvector(isbn) @@ plainto_tsquery(:search_request) ORDER BY title ASC", {"search_request": search_request}).fetchall()
+        # derive search results by LIKE
+        simple_req = db.execute("SELECT * FROM practice.books WHERE title || author || isbn LIKE :search_request ORDER BY title ASC", {"search_request": liked_req}).fetchall()
+        # merge them there to_tsvector-to_tsquery goes first
+        for row_s in simple_req:
+            for row in smart_req:
+                if row_s == row:
+                    simple_req.remove(row_s)
+        smart_req.extend(simple_req)
+        
+        #if search result "None" return different page
+        if not smart_req:
+            return apology("Results not found")
+        return render_template("search.html", rows=smart_req)
 
-    return render_template("index.html", username=username.username)
-
+    else:
+        # derive username database
+        username = db.execute("SELECT username FROM practice.users \
+                                WHERE id = :id", {"id": session["user_id"]}).fetchone()    
+        return render_template("index.html", username=username.username)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -175,6 +202,17 @@ def errorhandler(e):
         e = InternalServerError()
     return apology(e.name, e.code)
 
+#create search variable for LIKE
+def phraseforlike(words):
+    x = '%'
+    a = 1
+    for word in words:
+        if a == 1:
+            x = x + word + '%'
+            a = 0
+        else:
+            x = x + ' AND %' + word + '%'
+    return x
 
 # Listen for errors
 for code in default_exceptions:
