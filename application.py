@@ -1,9 +1,10 @@
 import os
+import requests
 
 #set FLASK_APP=application.py
-#set DATABASE_URL=
+#set DATABASE_URL=postgres://ribvyxoiljnmtg:747a0c2d02fe22bf66d2a41dbd0f6848e208deb9cd84353b5a076a661ae115d5@ec2-46-137-156-205.eu-west-1.compute.amazonaws.com:5432/d5dtbbafsqfea9
 
-from flask import Flask, session, redirect, render_template, request
+from flask import Flask, session, redirect, render_template, jsonify, request
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -12,6 +13,7 @@ from werkzeug.exceptions import default_exceptions, HTTPException, InternalServe
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+
 
 # Check for environment variable
 if not os.getenv("DATABASE_URL"):
@@ -74,11 +76,7 @@ def index():
         #get user search request
         search_request = request.form.get("search_request")
         request_splitted = search_request.split()
-        print(type(request_splitted))
-        print(type(request_splitted[0]))
-        print(request_splitted[0])
         liked_req = phraseforlike(request_splitted)
-        print(liked_req)
         # derive search results by to_tsvector-to_tsquery
         smart_req = db.execute("SELECT * FROM practice.books WHERE to_tsvector(title) || to_tsvector(author) || to_tsvector(isbn) @@ plainto_tsquery(:search_request) ORDER BY title ASC", {"search_request": search_request}).fetchall()
         # derive search results by LIKE
@@ -98,7 +96,7 @@ def index():
     else:
         # derive username database
         username = db.execute("SELECT username FROM practice.users \
-                                WHERE id = :id", {"id": session["user_id"]}).fetchone()    
+                                WHERE id = :id", {"id": session["user_id"]}).fetchone()
         return render_template("index.html", username=username.username)
 
 @app.route("/login", methods=["GET", "POST"])
@@ -195,7 +193,79 @@ def register():
     else:
         return render_template("register.html")
 
-        
+@app.route("/books/<int:book>", methods=["GET", "POST"])
+def books(book):
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # check delete request
+        delete = request.form.get("delete")       
+        if delete:
+            db.execute("DELETE FROM practice.reviews WHERE book_id = :book_id",
+            {"book_id": book})
+
+            rev_count = db.execute("SELECT COUNT(*) FROM practice.reviews WHERE book_id = :book_id",
+            {"book_id": book}).fetchone()    
+            db.execute("UPDATE practice.books SET review_count = :rev_count WHERE id = :id",
+            {"id": book, "rev_count": rev_count[0]})
+
+            av_score = db.execute("SELECT AVG(score) FROM practice.reviews WHERE book_id = :book_id",
+            {"book_id": book}).fetchone()
+            db.execute("UPDATE practice.books SET average_score = :av_score WHERE id = :id",
+            {"id": book, "av_score": av_score[0]}) 
+            db.commit()
+        review = request.form.get("review")
+        # check review request TO DO^ add to delet avg
+        if review:
+            score = request.form.get("score")
+            if review is None:
+                return apology("Add review", 400)
+            db.execute("INSERT INTO practice.reviews (review, book_id, user_id) VALUES (:review, :book_id, :user_id)",
+            {"review": review, "book_id": book, "user_id": session["user_id"]})
+            rev_count = db.execute("SELECT COUNT(*) FROM practice.reviews WHERE book_id = :book_id",
+            {"book_id": book}).fetchone()    
+            db.execute("UPDATE practice.books SET review_count = :rev_count WHERE id = :id",
+            {"id": book, "rev_count": rev_count[0]})
+            # check score
+            if score:
+                db.execute("UPDATE practice.reviews SET score = :score WHERE book_id = :book_id AND user_id = :user_id",
+                {"book_id": book, "user_id": session["user_id"], "score": score})
+                av_score = db.execute("SELECT AVG(score) FROM practice.reviews WHERE book_id = :book_id",
+                {"book_id": book}).fetchone()
+                db.execute("UPDATE practice.books SET average_score = :av_score WHERE id = :id",
+                {"id": book, "av_score": av_score[0]})
+            db.commit()      
+    # User reached route via GET (as by clicking a link or via redirect)
+    #else:
+    # Make sure book exists.
+    getbook = db.execute("SELECT * FROM practice.books WHERE id = :id", {"id": book}).fetchone()
+    #user_reviews = db.execute("SELECT * FROM practice.reviews WHERE book_id = :id", {"id": book}).fetchall()  
+    user_review = db.execute("SELECT * FROM practice.reviews WHERE user_id = :id AND book_id = :book_id", {"book_id": book, "id": session["user_id"]}).fetchone()
+    time = db.execute("SELECT to_char(timestamp, 'HH12:MI:SS, DD Mon YYYY') FROM practice.reviews WHERE user_id = :id AND book_id = :book_id", {"book_id": book, "id": session["user_id"]}).fetchone()
+    gr_info = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "5jXseztBn2uj3YIDp0rA", "isbns": getbook.isbn})
+    gr_book = gr_info.json()
+    g_req = gr_book['books'][0]
+    if getbook is None:
+        return apology("No such book", 400)
+    return render_template("book.html", getbook=getbook, gr_info=g_req, user_review=user_review, time=time)
+
+@app.route("/api/<string:isbn_api>")
+def book_api(isbn_api):
+    #Return details about a book.
+
+    # Make sure book exists.
+    getbook = db.execute("SELECT * FROM practice.books WHERE isbn = :isbn", {"isbn": isbn_api}).fetchone()
+    if getbook is None:
+        return jsonify({"error": "this string or isbn number isn’t in database"}), 404
+
+    return jsonify({
+            "isbn": getbook.isbn,
+            "title": getbook.title,
+            "author": getbook.author,
+            "year": getbook.year,
+            "review_count": getbook.review_count,
+            "average_score": getbook.average_score
+        })
+
 def errorhandler(e):
     """Handle error"""
     if not isinstance(e, HTTPException):

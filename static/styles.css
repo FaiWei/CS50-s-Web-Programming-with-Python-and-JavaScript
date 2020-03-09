@@ -7,6 +7,10 @@
     color: #2e944b;
 }
 
+.infobook
+{
+    text-align: left;
+}
 main .form-control
 {
     /* center form controls */

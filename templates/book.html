@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Main Page
+{% endblock %}
+
+{% block main %}
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md infobook">
+                <h5>Hello! You extracted {{ getbook.title }}</h1>
+                Author: {{ getbook.author }}<br>
+                Year: {{ getbook.year }}<br>
+                ISBN: {{ getbook.isbn }}<br>
+                GR ID: {{ gr_info.id }}<br>
+                GR ISBN13: {{ gr_info.isbn13 }}<br>
+                GR ratings count: {{ gr_info.ratings_count }}<br>
+                GR reviews count: {{ gr_info.reviews_count }}<br>
+                GR text reviews count: {{ gr_info.text_reviews_count }}<br>
+                GR work ratings count: {{ gr_info.work_ratings_count }}<br>
+                GR work reviews count: {{ gr_info.work_reviews_count }}<br>
+                GR work text reviews count: {{ gr_info.work_text_reviews_count }}<br>
+                GR average rating: {{ gr_info.average_rating }}<br>
+                --------------------------------------<br>
+                review_count: {{ getbook.review_count }}<br>
+                average_score: {{ getbook.average_score }}<br>
+                <br>
+            </div>
+        </div>  
+        {% if not user_review.review %}
+        <div class="row">
+            <div class="col-md">
+                <br>
+                <br>
+                {{ user_review.review }}
+                <br>
+                <form action="/books/{{ getbook.id }}" method="post">
+                    <fieldset>
+                        <div class="form-group">
+                            <label class="mr-sm-2" for="inlineFormCustomSelect">Rate</label>
+                            <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" name="score">
+                              <option selected>Choose...</option>
+                              <option value="1">One</option>
+                              <option value="2">Two</option>
+                              <option value="3">Three</option>
+                              <option value="4">Four</option>
+                              <option value="5">Five</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="submit">Submit</br>review</button>
+                            </div>
+                            <textarea class="form-control" aria-label="With textarea" name="review" placeholder="Write what you think about the book"></textarea>
+                          </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="row">
+            <div class="col-md infobook">
+                <h5>User post by {{ user_review.user_id }} in {{ time[0] }}</h1>
+                User score: {{ user_review.score }}<br>
+                Review: {{ user_review.review }}<br>
+                <br>
+                <form action="/books/{{ getbook.id }}" method="post">
+                <button name="delete" type="submit" value="1" class="btn btn-outline-primary">Delete</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}   
+    </div>
+
+{% endblock %}
