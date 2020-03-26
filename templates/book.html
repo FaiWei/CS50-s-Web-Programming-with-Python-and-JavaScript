@@ -25,15 +25,15 @@
                 --------------------------------------<br>
                 review_count: {{ getbook.review_count }}<br>
                 average_score: {{ getbook.average_score }}<br>
+                extract info test: {{ user_reviews[0].username }}<br>               
                 <br>
             </div>
         </div>  
-        {% if not user_review.review %}
+        {% if not check %}
         <div class="row">
             <div class="col-md">
                 <br>
                 <br>
-                {{ user_review.review }}
                 <br>
                 <form action="/books/{{ getbook.id }}" method="post">
                     <fieldset>
@@ -58,18 +58,21 @@
                 </form>
             </div>
         </div>
-        {% else %}
+        {% endif %} 
+        {% if user_reviews %}
+        {% for review in user_reviews %}
         <div class="row">
             <div class="col-md infobook">
-                <h5>User post by {{ user_review.user_id }} in {{ time[0] }}</h1>
-                User score: {{ user_review.score }}<br>
-                Review: {{ user_review.review }}<br>
+                <h5>Posted by {{ review.username }} {{ review.to_char }}</h1>
+                User score: {{ review.score }}<br>
+                Review: {{ review.review }}<br>
                 <br>
                 <form action="/books/{{ getbook.id }}" method="post">
                 <button name="delete" type="submit" value="1" class="btn btn-outline-primary">Delete</button>
                 </form>
             </div>
         </div>
+        {% endfor %}
         {% endif %}   
     </div>
 

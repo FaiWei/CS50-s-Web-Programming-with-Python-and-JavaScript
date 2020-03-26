@@ -235,18 +235,16 @@ def books(book):
                 {"id": book, "av_score": av_score[0]})
             db.commit()      
     # User reached route via GET (as by clicking a link or via redirect)
-    #else:
     # Make sure book exists.
     getbook = db.execute("SELECT * FROM practice.books WHERE id = :id", {"id": book}).fetchone()
-    #user_reviews = db.execute("SELECT * FROM practice.reviews WHERE book_id = :id", {"id": book}).fetchall()  
-    user_review = db.execute("SELECT * FROM practice.reviews WHERE user_id = :id AND book_id = :book_id", {"book_id": book, "id": session["user_id"]}).fetchone()
-    time = db.execute("SELECT to_char(timestamp, 'HH12:MI:SS, DD Mon YYYY') FROM practice.reviews WHERE user_id = :id AND book_id = :book_id", {"book_id": book, "id": session["user_id"]}).fetchone()
+    user_reviews = db.execute("SELECT to_char(practice.reviews.timestamp, 'HH12:MI:SS, DD Mon YYYY'), practice.reviews.review, practice.reviews.score, practice.reviews.user_id, practice.reviews.book_id, practice.users.username FROM practice.reviews, practice.users WHERE practice.users.id = practice.reviews.user_id AND practice.reviews.book_id = :id", {"id": book}).fetchall()
+    check = db.execute("SELECT review FROM practice.reviews WHERE book_id = :id", {"id": book}).fetchone()
     gr_info = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "5jXseztBn2uj3YIDp0rA", "isbns": getbook.isbn})
     gr_book = gr_info.json()
     g_req = gr_book['books'][0]
     if getbook is None:
         return apology("No such book", 400)
-    return render_template("book.html", getbook=getbook, gr_info=g_req, user_review=user_review, time=time)
+    return render_template("book.html", getbook=getbook, gr_info=g_req, user_reviews=user_reviews, check=check.review)
 
 @app.route("/api/<string:isbn_api>")
 def book_api(isbn_api):
