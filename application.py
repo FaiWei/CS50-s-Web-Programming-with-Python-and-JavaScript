@@ -200,8 +200,8 @@ def books(book):
         # check delete request
         delete = request.form.get("delete")       
         if delete:
-            db.execute("DELETE FROM practice.reviews WHERE book_id = :book_id",
-            {"book_id": book})
+            db.execute("DELETE FROM practice.reviews WHERE book_id = :book_id AND user_id = :user_id",
+            {"book_id": book, "user_id": session["user_id"]})
 
             rev_count = db.execute("SELECT COUNT(*) FROM practice.reviews WHERE book_id = :book_id",
             {"book_id": book}).fetchone()    
@@ -233,18 +233,52 @@ def books(book):
                 {"book_id": book}).fetchone()
                 db.execute("UPDATE practice.books SET average_score = :av_score WHERE id = :id",
                 {"id": book, "av_score": av_score[0]})
-            db.commit()      
+            db.commit()   
+
     # User reached route via GET (as by clicking a link or via redirect)
-    # Make sure book exists.
     getbook = db.execute("SELECT * FROM practice.books WHERE id = :id", {"id": book}).fetchone()
-    user_reviews = db.execute("SELECT to_char(practice.reviews.timestamp, 'HH12:MI:SS, DD Mon YYYY'), practice.reviews.review, practice.reviews.score, practice.reviews.user_id, practice.reviews.book_id, practice.users.username FROM practice.reviews, practice.users WHERE practice.users.id = practice.reviews.user_id AND practice.reviews.book_id = :id", {"id": book}).fetchall()
-    check = db.execute("SELECT review FROM practice.reviews WHERE book_id = :id", {"id": book}).fetchone()
+    user_reviews = db.execute("SELECT to_char(practice.reviews.timestamp, 'HH12:MI:SS, DD Mon YYYY'), practice.reviews.review, \
+                                practice.reviews.score, practice.reviews.user_id, practice.reviews.book_id, practice.users.username \
+                                FROM practice.reviews, practice.users \
+                                WHERE practice.users.id = practice.reviews.user_id AND practice.reviews.book_id = :id", {"id": book}).fetchall()
+    check = db.execute("SELECT review FROM practice.reviews WHERE book_id = :id and user_id = :user_id", {"id": book, "user_id": session["user_id"]}).fetchone()
     gr_info = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "5jXseztBn2uj3YIDp0rA", "isbns": getbook.isbn})
-    gr_book = gr_info.json()
+    gr_book = gr_info.json() 
     g_req = gr_book['books'][0]
     if getbook is None:
         return apology("No such book", 400)
-    return render_template("book.html", getbook=getbook, gr_info=g_req, user_reviews=user_reviews, check=check.review)
+    return render_template("book.html", getbook=getbook, gr_info=g_req, user_reviews=user_reviews, check=check, user=session["user_id"])
+
+@app.route("/user_posts", methods=["GET", "POST"])
+def user_posts():
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
+        # check delete request
+        delete = request.form.get("delete")       
+        if delete:
+            db.execute("DELETE FROM practice.reviews WHERE book_id = :book_id",
+            {"book_id": delete})
+
+            rev_count = db.execute("SELECT COUNT(*) FROM practice.reviews WHERE book_id = :book_id",
+            {"book_id": delete}).fetchone()    
+            db.execute("UPDATE practice.books SET review_count = :rev_count WHERE id = :id",
+            {"id": delete, "rev_count": rev_count[0]})
+
+            av_score = db.execute("SELECT AVG(score) FROM practice.reviews WHERE book_id = :book_id",
+            {"book_id": delete}).fetchone()
+            db.execute("UPDATE practice.books SET average_score = :av_score WHERE id = :id",
+            {"id": delete, "av_score": av_score[0]}) 
+            db.commit()
+
+    # User reached route via GET (as by clicking a link or via redirect)
+    username = db.execute("SELECT username FROM practice.users WHERE id = :id", {"id": session["user_id"]}).fetchone()
+
+    getpost = db.execute("SELECT to_char(practice.reviews.timestamp, 'HH12:MI:SS, DD Mon YYYY'), practice.reviews.review, \
+                    practice.reviews.score, practice.reviews.book_id, practice.books.title \
+                    FROM practice.books, practice.reviews \
+                    WHERE practice.reviews.user_id = :id AND practice.reviews.book_id = practice.books.id", {"id": session["user_id"]}).fetchall()
+ 
+    return render_template("user_posts.html", getpost=getpost, username=username.username)
 
 @app.route("/api/<string:isbn_api>")
 def book_api(isbn_api):

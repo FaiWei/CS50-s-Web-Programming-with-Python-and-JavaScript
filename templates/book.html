@@ -1,44 +1,42 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Main Page
+    {{ getbook.title }}
 {% endblock %}
 
 {% block main %}
 
     <div class="container">
-        <div class="row">
-            <div class="col-md infobook">
-                <h5>Hello! You extracted {{ getbook.title }}</h1>
-                Author: {{ getbook.author }}<br>
-                Year: {{ getbook.year }}<br>
-                ISBN: {{ getbook.isbn }}<br>
-                GR ID: {{ gr_info.id }}<br>
-                GR ISBN13: {{ gr_info.isbn13 }}<br>
-                GR ratings count: {{ gr_info.ratings_count }}<br>
-                GR reviews count: {{ gr_info.reviews_count }}<br>
-                GR text reviews count: {{ gr_info.text_reviews_count }}<br>
-                GR work ratings count: {{ gr_info.work_ratings_count }}<br>
-                GR work reviews count: {{ gr_info.work_reviews_count }}<br>
-                GR work text reviews count: {{ gr_info.work_text_reviews_count }}<br>
-                GR average rating: {{ gr_info.average_rating }}<br>
-                --------------------------------------<br>
-                review_count: {{ getbook.review_count }}<br>
-                average_score: {{ getbook.average_score }}<br>
-                extract info test: {{ user_reviews[0].username }}<br>               
+        <div class="row infobook">
+            <div class="card bg-light col-10">
+                <div class="card-header"><h5><b>{{ getbook.title }}</b></h5></div>
+                <div class="card-body">
+                <h5><b>Author:</b> {{ getbook.author }}</h5><br>
+                <h5><b>Year:</b> {{ getbook.year }}</h5><br>
+                <h5><b>ISBN:</b> <a href="/api/{{ getbook.isbn }}">{{ getbook.isbn }}</a></h5><br>
+                <h5><b>Review count:</b> {{ getbook.review_count }}</h5><br>
+                <h5><b>Average score:</b> {{ getbook.average_score }}</h5><br>   
+                <hr>
+                <h5><b>GoodReads ratings count:</b> {{ gr_info.ratings_count }}</h5><br>
+                <h5><b>GoodReads reviews count:</b> {{ gr_info.reviews_count }}</h5><br>
+                <h5><b>GoodReads text reviews count:</b> {{ gr_info.text_reviews_count }}</h5><br>
+                <h5><b>GoodReads work ratings count:</b> {{ gr_info.work_ratings_count }}</h5><br>
+                <h5><b>GoodReads work reviews count:</b> {{ gr_info.work_reviews_count }}</h5><br>
+                <h5><b>GoodReads work text reviews count:</b> {{ gr_info.work_text_reviews_count }}</h5><br>
+                <h5><b>GoodReads average rating:</b> {{ gr_info.average_rating }}</h5><br>
                 <br>
+                </div>
             </div>
-        </div>  
+        </div>
+        <br>
         {% if not check %}
         <div class="row">
-            <div class="col-md">
-                <br>
-                <br>
+            <div class="col-10">
                 <br>
                 <form action="/books/{{ getbook.id }}" method="post">
                     <fieldset>
                         <div class="form-group">
-                            <label class="mr-sm-2" for="inlineFormCustomSelect">Rate</label>
+                            <h5><label class="mr-sm-2" for="inlineFormCustomSelect"><b>Rate</b></label></h5>
                             <select class="custom-select mr-sm-2" id="inlineFormCustomSelect" name="score">
                               <option selected>Choose...</option>
                               <option value="1">One</option>
@@ -50,7 +48,7 @@
                         </div>
                         <div class="input-group">
                             <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="submit">Submit</br>review</button>
+                                <button class="btn btn-secondary" type="submit">Submit</br>review</button>
                             </div>
                             <textarea class="form-control" aria-label="With textarea" name="review" placeholder="Write what you think about the book"></textarea>
                           </div>
@@ -58,21 +56,41 @@
                 </form>
             </div>
         </div>
-        {% endif %} 
+        {% endif %}
+        <br>
+        <div class="row infobook">
+            <div class="card bg-light col-10">
+                <h4><b>Reviews</b></h4>    
+            </div>
+        </div>               
         {% if user_reviews %}
         {% for review in user_reviews %}
-        <div class="row">
-            <div class="col-md infobook">
-                <h5>Posted by {{ review.username }} {{ review.to_char }}</h1>
-                User score: {{ review.score }}<br>
-                Review: {{ review.review }}<br>
-                <br>
+        <div class="row infobook">
+            <div class="card bg-light col-10">
+                <div class="card-body">
+                    <h5>User score: {{ review.score }}</h5>
+                    <h5 class="card-title">Review:</h5>
+                    <p class="card-text">{{ review.review }}</p>
+                    <p class="card-text infobook-r">Posted by {{ review.username }} {{ review.to_char }}</p>
+                </div>
+            </div>
+            {% if review.user_id == user %}
+            <div class="col-sm">
                 <form action="/books/{{ getbook.id }}" method="post">
-                <button name="delete" type="submit" value="1" class="btn btn-outline-primary">Delete</button>
+                    <button name="delete" type="submit" value="1" class="btn btn-outline-primary">Delete</button>
                 </form>
             </div>
+            {% endif %}             
         </div>
+        <br>       
         {% endfor %}
+        {% else %}
+        <div class="row infobook">
+            <div class="card bg-light col-10">
+                <div class="card-header"><h5>None.</h5></div>
+            </div>
+        </div>
+        <br> 
         {% endif %}   
     </div>
 

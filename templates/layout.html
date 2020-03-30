@@ -24,7 +24,12 @@
     <body>
 
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
-            <a class="navbar-brand" href="/"><span id="green">Books</span></a>
+            <a class="navbar-brand" href="/">
+                <img src="/static/book.png" width="30" height="30" alt="">
+                <span id="green">
+                    Books
+                </span>
+            </a>
             <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -32,10 +37,9 @@
                 {% if session.user_id %}
                     <ul class="navbar-nav mr-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/">Search</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/search">Search result</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/sell">Sell</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/history">History</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/user_posts">User posts</a></li>
                     </ul>
+                    <div class="dropdown-divider"></div>
                     <ul class="navbar-nav ml-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                     </ul>
@@ -60,8 +64,9 @@
             {% block main %}{% endblock %}
         </main>
         
-        <footer class="small text-center text-muted">
+        <footer class="small text-right text-muted fixed-bottom">
             Created by Igor Terentyev. Data provided for free by <a href=" https://www.goodreads.com/">Goodreads</a>.
+            <br>
         </footer>
 
     </body>

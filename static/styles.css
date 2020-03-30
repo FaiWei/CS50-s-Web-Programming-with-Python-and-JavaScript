@@ -11,6 +11,12 @@
 {
     text-align: left;
 }
+
+.infobook-r
+{
+    text-align: right;
+}
+
 main .form-control
 {
     /* center form controls */
