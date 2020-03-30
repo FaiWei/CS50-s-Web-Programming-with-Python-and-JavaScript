@@ -12,7 +12,7 @@ application.py — the program works with flask.
 static\styles.css — personal css file.
 templates\layout.html — design for the site.
 templates\index.html — main page with search.
-static\book.png — picture for error.
+static\book.png — picture for navigation bar.
 templates\apology.html — the page on which the error is generated.
 templates\book.html — page generating data about the book.
 templates\login.html — page to enter the site.
