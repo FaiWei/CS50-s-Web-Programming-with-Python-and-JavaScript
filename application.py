@@ -12,6 +12,7 @@ app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 socketio = SocketIO(app)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+#set FLASK_ENV=development //debug option
 Session(app)
 
 
@@ -43,24 +44,21 @@ def index():
 def usercheck():
 
     #login html
-    input_user = '<form method="post"><fieldset><div class="form-group">\
-            <input name="username" autocomplete="off" autofocus class="form-control" placeholder="Nickname" type="text"/></div>\
-            <div class="form-group"><button class="btn btn-primary" type="submit">Input nickname</button></div></fieldset></form>'
-    usercarcas = '<h2>Oof, ${name}!</h2>'
+    hello_user = '<h2>Oof, ${name}!</h2>'
 
     #check if username already exists
     if session.get("username") is None:
-        return jsonify({"success": False, "input": input_user})
+        return jsonify({"success": False })
 
     #return json with username
-    return jsonify({"success": True, "usercarcas": usercarcas, "user": session["username"]})
+    return jsonify({"success": True, "helloUser": hello_user, "user": session["username"]})
 
-@socketio.on("submit vote")
+@socketio.on("submit channel name")
 def vote(data):
-    selection = data["selection"]
-    votes[selection] += 1
-    emit("vote totals", votes, broadcast=True)
-
+    channel_name_emit = data["channel_name"]
+    print('sdfsd')
+    print(data["channel_name"])
+    emit("share channel name", {"ChannelNameEmit": channel_name_emit}, broadcast=True)
 
 
 @app.route("/logout")
