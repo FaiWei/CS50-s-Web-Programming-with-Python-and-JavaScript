@@ -17,8 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     connectionTie.on('connect', () => {
         document.querySelector('#createChannelButton').onclick = () => {
             const ChannelName = document.querySelector('#inputChannelName').value;
-            
-            console.log('wug');
             connectionTie.emit('submit channel name', {'channel_name': ChannelName});
             document.querySelector('#inputChannelName').value = '';
             // Stop form from submitting
@@ -34,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add new item to task list
         document.querySelector('#channelList').append(li);
+        document.querySelector('#brrValue').innerHTML += data.ChannelNameEmit + '.';;
     });
 });
 

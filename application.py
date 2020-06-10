@@ -56,8 +56,6 @@ def usercheck():
 @socketio.on("submit channel name")
 def vote(data):
     channel_name_emit = data["channel_name"]
-    print('sdfsd')
-    print(data["channel_name"])
     emit("share channel name", {"ChannelNameEmit": channel_name_emit}, broadcast=True)
 
 
