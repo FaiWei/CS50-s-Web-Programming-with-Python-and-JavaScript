@@ -32,7 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add new item to task list
         document.querySelector('#channelList').append(li);
-        document.querySelector('#brrValue').innerHTML += data.ChannelNameEmit + '.';;
+        let brrValue = document.querySelector('#brrValue');
+        brrValue.innerHTML += data.ChannelNameEmit + '.';;
     });
 });
 
