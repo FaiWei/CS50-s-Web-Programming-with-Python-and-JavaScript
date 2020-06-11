@@ -1,12 +1,13 @@
 //console.log(`user check initiated`);
 document.addEventListener('DOMContentLoaded', () => {
     // log in user info
+    let nickname;
     const request = new XMLHttpRequest();
     request.open('GET', '/usercheck');
     request.onload = () => {
         const response = JSON.parse(request.response);
         if (response.success) {            
-            const nickname = response.user;
+            nickname = response.user;
             let helloUserDiv = document.querySelector('#helloUser');
             helloUserDiv.innerHTML += nickname + '.';
         }
@@ -28,12 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Create new item for list
         console.log('we are here bro');
         const li = document.createElement('li');
-        li.innerHTML = data.ChannelNameEmit;
+        const channelLink = document.createElement('li');
+        channelLink.href = "";
+        channelLink.class = "channel-link";
+        channelLink.dataset.link = `${data.ChannelNameEmit}`;
+        channelLink.innerHTML = `${data.ChannelNameEmit}`;
+        li.append(channelLink);
 
         // Add new item to task list
         document.querySelector('#channelList').append(li);
         let brrValue = document.querySelector('#brrValue');
-        brrValue.innerHTML += data.ChannelNameEmit + '.';;
+        brrValue.innerHTML = `Last broadcast value: ${data.ChannelNameEmit}.`;
     });
 });
 

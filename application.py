@@ -15,6 +15,10 @@ app.config["SESSION_TYPE"] = "filesystem"
 #set FLASK_ENV=development //debug option
 Session(app)
 
+#class for channels
+class Channel:
+    def __init__(self, array):
+        self.array = array
 
 def apology(message, code=400):
     """Render message as an apology to user."""
@@ -29,7 +33,6 @@ def apology(message, code=400):
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
 
-votes = {"yes": 0, "no": 0, "maybe": 0}
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -43,15 +46,12 @@ def index():
 @app.route("/usercheck", methods=["GET", "POST"])
 def usercheck():
 
-    #login html
-    hello_user = '<h2>Oof, ${name}!</h2>'
-
     #check if username already exists
     if session.get("username") is None:
         return jsonify({"success": False })
 
     #return json with username
-    return jsonify({"success": True, "helloUser": hello_user, "user": session["username"]})
+    return jsonify({"success": True, "user": session["username"]})
 
 @socketio.on("submit channel name")
 def vote(data):
