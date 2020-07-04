@@ -16,9 +16,29 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 #class for channels
+pass_channel_id = {}
+
 class Channel:
-    def __init__(self, array):
-        self.array = array
+    def __init__(self):
+        self.id = 0
+        self.channel = {}             
+        self.time = {}
+        self.check = False
+        self.channel_name = {}
+    def regID(self, channel_name):
+        self.channel_name[self.id] = channel_name
+        self.channel[self.id] = []
+        self.id += 1
+        self.check = True
+        return self.id - 1
+    def memorizeMessage(self, channel_id, message, timestamp, user):
+        dict_temp = {'message': message, 'user': user, 'timestamp': timestamp}
+        self.channel[channel_id].append(dict_temp) 
+        if (len(self.channel[channel_id]) > 100):
+            print('deleted: ' + self.channel[channel_id].pop(0)) 
+
+
+channels_storage = Channel()
 
 def apology(message, code=400):
     """Render message as an apology to user."""
@@ -43,20 +63,47 @@ def index():
 
     return render_template("index.html", username=session["username"])
 
-@app.route("/usercheck", methods=["GET", "POST"])
-def usercheck():
-
+@app.route("/check", methods=["GET", "POST"])
+def check_current_situation():
+    global channels_storage
+    global pass_channel_id
     #check if username already exists
-    if session.get("username") is None:
-        return jsonify({"success": False })
+    if session.get("username"):
+        if channels_storage.check:
+            print('channel in check: ' + str(pass_channel_id[session["username"]]))
 
-    #return json with username
-    return jsonify({"success": True, "user": session["username"]})
+            return jsonify({"success": True, "user": session["username"], "loadChannelsReady": True, "LoadExistingChannels": channels_storage.channel_name, "ChannelID": pass_channel_id[session["username"]]})
+        else:
+            return jsonify({"success": True, "user": session["username"], "loadChannelsReady": False})
+    else:
+        return jsonify({"success": False})
+
+  
 
 @socketio.on("submit channel name")
-def vote(data):
+def channel_submit(data):
     channel_name_emit = data["channel_name"]
-    emit("share channel name", {"ChannelNameEmit": channel_name_emit}, broadcast=True)
+    global channels_storage
+    channel_number = channels_storage.regID(channel_name_emit) 
+    global pass_channel_id
+    pass_channel_id[session["username"]] = channel_number
+    emit("share channel name", {"ChannelNameEmit": channel_name_emit, "ChannelID": channel_number, "ChatCreated": True}, broadcast=True)
+
+@socketio.on("submit message")
+def message_submit(data):
+    user_message_emit = data["user_message"]
+    time_stamp_emit = data["time_stamp"]
+    global pass_channel_id 
+    global channels_storage
+    channels_storage.memorizeMessage(pass_channel_id[session["username"]], user_message_emit, time_stamp_emit, session["username"]) 
+    emit("share user message", {"UserMessageEmit": user_message_emit, "User": session["username"], "Timestamp": time_stamp_emit}, broadcast=True)
+
+@app.route("/<int:channel_id>")
+def channels(channel_id):
+    global channels_storage
+    global pass_channel_id 
+    pass_channel_id[session["username"]] = channel_id
+    return jsonify({"success": True, "Messages": channels_storage.channel[channel_id], "Channel": channels_storage.channel_name[channel_id]})
 
 
 @app.route("/logout")

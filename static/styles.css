@@ -41,3 +41,22 @@ main img
     max-width: 100%;
 }
 
+.gree {
+    background-color: green;
+}
+
+.red {
+    background-color: red;
+}
+.blue {
+    background-color: blue;
+}
+.pink {
+    background-color: pink;
+}
+.orange {
+    background-color: orange;
+}
+.cent {
+    text-align: center;
+}

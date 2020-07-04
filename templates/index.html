@@ -5,12 +5,10 @@
 {% endblock %}
 
 {% block main %}
-    <div class="container">     
+    <div class="container-fluid">     
         {% if username %}
-        <div class="row">
-            <div class="col-md">
-                <br>
-                <h2><div id="helloUser">You joined as </div></h2>
+        <div class="gree row">
+            <div class="pink col-xs">
                 <form>
                     <fieldset">
                         <div class="form-group">
@@ -19,13 +17,39 @@
                         <div class="form-group">
                             <button id="createChannelButton" type="submit" class="btn btn-primary">Add channel</button>
                         </div>
+                        <div class="form-group">
+                            <button id="spam" type="submit" class="btn btn-primary">Go and spam</button>
+                        </div>
                     </fieldset> 
                 </form>
-                <br>
-                <h2><div id="brrValue">Last broadcast value: </div></h2>
-                <div id="channelList"></div>
+                <div id="channelList">
+                </div>
             </div>
-        </div>  
+            <div class="col-lg">
+                <div class="row orange">
+                    <div class="col-md">
+                        <br> 
+                        <h4><div id="titleChannel" class="red">Channel #</div></h4>
+                        <br> 
+                        <h2><div id="helloUser">You joined as </div></h2>
+                        <br>
+                        <br>
+                    </div>
+                </div>
+                <div class="row">
+                    <hr>
+                    <div class="col-md" id="channel-chat">
+                        No messages found.
+                    </div>
+                    <br><br>
+                </div>
+                <div class="row">
+                    <div class="col-md" id="message-in-chat"> 
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         {% else %}     
         <div class="row">
             <div class="col-md">
