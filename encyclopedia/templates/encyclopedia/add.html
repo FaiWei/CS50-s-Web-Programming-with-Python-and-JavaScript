@@ -1,0 +1,17 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Encyclopedia
+{% endblock %}
+
+{% block body %}
+    <h1>All Pages</h1>
+
+    <p> Result: {{ value }}</p>
+    
+    <form action="{% url 'add' %}" method="post">
+        <input type="text">
+        <input type="submit">
+    </form>
+
+{% endblock %}
