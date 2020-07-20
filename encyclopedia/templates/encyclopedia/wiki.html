@@ -7,6 +7,8 @@
 {% block body %}
     <h1>Page status</h1>
 
-    <p> Result: {{ value }}</p>
+    <p> Result: <br>{{ wiki_page|safe }}</p>
+
+    <p> <a href="{% url 'edit' page_name %}">Edit</a></p>
 
 {% endblock %}

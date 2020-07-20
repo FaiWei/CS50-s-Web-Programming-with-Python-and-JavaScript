@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from random import choice
 
 from . import util
 
@@ -10,25 +11,41 @@ def index(request):
 
 
 def wiki(request, title):
-    page_name = title
     wiki_page = util.get_entry(title)
     if wiki_page:
-        valueX = wiki_page
+        wiki_page = util.md_to_html(wiki_page)
     else:
-        valueX = False
+        wiki_page = False
     return render(request, "encyclopedia/wiki.html", {
-        "value": valueX, "page_name": page_name
+        "wiki_page": wiki_page, "page_name": title
     })  
 
-def add(request):
+
+def edit(request, title):
     if request.method == "POST":
-        # request.POST - submited data 1.25 time in lecture
-        valueX = True
-    else:
-        valueX = False
-    return render(request, "encyclopedia/add.html", {
-        "value": valueX
-    })
+        print('we are 1')
+        util.save_entry(title , request.POST['content'])
+        return wiki(request, title)
+
+    wiki_content = util.get_entry(title)
+    print('we are 2')
+    return render(request, "encyclopedia/edit.html", {
+            "wiki_title": title, "wiki_content": wiki_content,
+        })
+
+
+def new(request):
+    if request.method == "POST":
+        wiki_title = request.POST['title']
+        wiki_content = request.POST['content']
+        if not util.get_entry(wiki_title):
+            util.save_entry(wiki_title, wiki_content)
+            return wiki(request, wiki_title)
+        message = 'Article already exist.'
+        return error(request, message)
+
+    return render(request, "encyclopedia/new.html")
+
 
 def search(request):
     if request.method == "POST":
@@ -46,3 +63,12 @@ def search(request):
             })
     else:
         return index(request)
+
+
+def random(request):
+    return wiki(request, choice(util.list_entries()))
+
+def error(request, message):
+    return render(request, "encyclopedia/error.html", {
+        "message": message
+    })

@@ -8,7 +8,7 @@
     Searched: {{ wiki_page }}
     <ul>
         {% for list in search_list %}
-            <li><a href="wiki/{{ list }}">{{ list }}</a></li>
+            <li><a href="{% url 'wiki' list %}">{{ list }}</a></li>
         {% empty %}
             <li>Nothing found</li>
         {% endfor %}
