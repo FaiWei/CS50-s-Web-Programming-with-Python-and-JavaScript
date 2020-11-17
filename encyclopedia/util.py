@@ -2,7 +2,7 @@ import re
 
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
-
+from django import forms
 
 def list_entries():
     """
@@ -36,21 +36,20 @@ def get_entry(title):
     except FileNotFoundError:
         return None
 
+def compress_newlines(text):
+    template = re.compile(r'[\n\r][\n\r][\n\r]')
+    text = template.sub('\n', text)
+    return text
+
 def md_to_html(text):
     """
     Returns text with html.
     """
-    #print('md_to_html initial: ' + text)
     text = head_html(text)
-    #print('md_to_html after head_html: ' + text)  
     text = link_html(text)
-    #print('md_to_html after link: ' + text)
     text = b_html(text)
-    #print('md_to_html after b_html: ' + text)
-    text = ul_html(text)
-    #print('md_to_html after ul_html: ' + text)  
+    text = ul_html(text) 
     text = p_html(text)
-    print('md_to_html after p_html: ' + text) 
     return text
 
 def b_html(text):
@@ -99,32 +98,46 @@ def head_html(text):
         for head_tag in head_list:
             head_size = str(len(head_size_template.search(head_tag).group()))
             slice_chara = 1 + int(head_size)
-            compiled_head = f'<h{head_size}>{head_tag[slice_chara:]}</h{head_size}><br>'
+            sliced_head_tag = head_tag[slice_chara:(len(head_tag))]
+            compiled_head =  '<h{}>{}</h{}><br>'.format(head_size, sliced_head_tag.strip("\t\n\r\f\v"), head_size)
             text = text.replace(head_tag, compiled_head, 1)
     return text
 
 
 def ul_html(text):
     ul_template = re.compile(r'[\*-]+ .+')
+    op_li = '<li>'
+    end_li = '</li>'
     if ul_template.search(text):
         ul_list = ul_template.findall(text)
         for li_tag in ul_list:
-            compiled_li = '<li>{}</li>'.format(li_tag[2:])
+            compiled_li = '{}{}{}'.format(op_li, li_tag[2:].strip('\n\r'), end_li)
             if li_tag == ul_list[0]:
                 compiled_li = f'<ul>{compiled_li}'
             if li_tag == ul_list[-1]:
-                compiled_li = f'{compiled_li}</ul>'   
+                compiled_li = f'{compiled_li}</ul>'
             text = text.replace(li_tag, compiled_li, 1)
     return text
 
-
 def p_html(text):
-    p_template = re.compile(r'[\n\r][\n\r].+\<u|[\n\r][\n\r].+[\n\r][\n\r]|[\n\r][\n\r].+\<h', flags=re.DOTALL)
-
-    if p_template.search(text):
-        p_list = p_template.findall(text)
-        for p_tag in p_list:
-            print('PTAG: ' + p_tag)
-            compiled_p = '<p>{}</p>'.format(p_tag[2:-2])
-            text = text.replace(p_tag, compiled_p, 1)
+    tag_template = re.compile(r'\<ul\>|\<h[1-9]\>')
+    text = text.strip('\n\r')
+    newlines_template = re.compile(r'[\n\r]{2,}')
+    splitted_text = re.split(newlines_template, text)
+    p_text = ''
+    for part in splitted_text:
+        if tag_template.search(part):
+            p_list = tag_template.findall(part)
+            for p_tag in p_list:
+                tempo_part_list = part.split(p_tag, 1)
+                if tempo_part_list[0] == '':
+                    p_text = '{}{}'.format(p_text, part)
+                else:
+                    tempo_part_str = tempo_part_list[0] + '</p>' + p_tag + tempo_part_list[1]
+                    p_text = '{}<p>{}'.format(p_text, tempo_part_str)
+                break
+        else:  
+            p_text = '{}<p>{}</p>'.format(p_text, part)
+    if p_text != '':
+        text = p_text
     return text

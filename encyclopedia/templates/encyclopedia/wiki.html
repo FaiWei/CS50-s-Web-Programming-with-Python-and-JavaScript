@@ -5,10 +5,22 @@
 {% endblock %}
 
 {% block body %}
-    <h1>Page status</h1>
-
-    <p> Result: <br>{{ wiki_page|safe }}</p>
-
-    <p> <a href="{% url 'edit' page_name %}">Edit</a></p>
-
+    <script type="text/javascript">
+        if (document.location.pathname == '/random') {
+            let defineUrl = 'wiki/{{ page_name }}';
+            window.history.pushState(null, null, defineUrl);
+        }
+    </script>
+    <div class="container">
+        {% if wiki_page %}
+            <br>
+            {{ wiki_page|safe }}
+            <br>     
+            <a class="btn btn-success" href="{% url 'edit' page_name %}">Edit</a>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                <b>{{ page_name }}</b> not found. Create new article <a href="{% url 'new' page_name %}">{{ page_name }}</a>
+            </div>
+        {% endif %} 
+    </div>
 {% endblock %}

@@ -5,13 +5,16 @@
 {% endblock %}
 
 {% block body %}
-    <h1>All Pages</h1>
-
-    <form action="{% url 'edit' wiki_title %}" method="post">
-        {% csrf_token %}
-        <!-- <input class="search" type="text" name="title" value="{{ wiki_title }}"> -->
-        <input class="search" type="text" name="content" value="{{ wiki_content }}">
-        <input type="submit">
-    </form>
-
+            <div class="container">
+                <h1>Edit "{{ wiki_title }}"</h1>
+                <form action="{% url 'edit' wiki_title %}" method="post">
+                    <div class="form-group">
+                        {% csrf_token %}
+                        <label for="Select1">Page content</label>
+                        <textarea class="form-control search" rows="10" name="content" id="Select1">{{ wiki_content|safe }}</textarea>
+                        <br>
+                        <button class="btn btn-success" type="submit">Edit Article</button>
+                    </div>
+                </form>
+            </div>
 {% endblock %}

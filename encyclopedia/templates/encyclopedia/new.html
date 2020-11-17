@@ -5,15 +5,18 @@
 {% endblock %}
 
 {% block body %}
-    <h1>All Pages</h1>
-
-    <p> Result: {{ value }}</p>
-    <form action="{% url 'new' %}" method="post">
-        {% csrf_token %}
-        <input class="search" type="text" name="title" placeholder="Title">
-        <input class="search" type="text" name="content" placeholder="Create new Article">
-        <input type="submit">
-    </form>
-
-
+            <div class="container">
+                <h1>Create New Page</h1>
+                <form action="{% url 'new' %}" method="post">
+                    <div class="form-group">
+                        {% csrf_token %}
+                        <label for="Select1">Page name</label>
+                        <input class="form-control search" type="text" name="title" placeholder="Title" id="Select1" value="{{ wiki_title }}">
+                        <label for="Select2">Page content</label>
+                        <textarea rows="10" cols="40" class="form-control search" name="content" placeholder="Create new Article" id="Select2"></textarea>
+                        <br>
+                        <button class="btn btn-success" type="submit">Create Article</button>
+                    </div>
+                </form>
+            </div>     
 {% endblock %}

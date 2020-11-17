@@ -5,13 +5,16 @@
 {% endblock %}
 
 {% block body %}
-    Searched: {{ wiki_page }}
-    <ul>
-        {% for list in search_list %}
-            <li><a href="{% url 'wiki' list %}">{{ list }}</a></li>
+    <div class="container">
+        <h1>Searched: <i>{{ wiki_page }}</i></h1>
+        {% for link in search_list %}
+            <div class="alert alert-success" role="alert">
+                <a href="{% url 'wiki' link %}">{{ link }}</a>
+            </div>
         {% empty %}
-            <li>Nothing found</li>
+            <div class="alert alert-warning" role="alert">
+                Nothing found
+            </div>
         {% endfor %}
-    </ul>
-
+    </div>
 {% endblock %}

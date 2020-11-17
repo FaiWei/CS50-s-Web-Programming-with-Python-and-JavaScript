@@ -13,6 +13,7 @@ def index(request):
 def wiki(request, title):
     wiki_page = util.get_entry(title)
     if wiki_page:
+        wiki_page = util.compress_newlines(wiki_page)
         wiki_page = util.md_to_html(wiki_page)
     else:
         wiki_page = False
@@ -23,18 +24,31 @@ def wiki(request, title):
 
 def edit(request, title):
     if request.method == "POST":
-        print('we are 1')
-        util.save_entry(title , request.POST['content'])
+        content = request.POST['content']
+        util.save_entry(title, content)
         return wiki(request, title)
-
-    wiki_content = util.get_entry(title)
-    print('we are 2')
+    get_content = util.get_entry(title)
+    wiki_content = util.compress_newlines(get_content)
     return render(request, "encyclopedia/edit.html", {
-            "wiki_title": title, "wiki_content": wiki_content,
+            "wiki_title": title, "wiki_content": wiki_content
         })
 
 
 def new(request):
+    if request.method == "POST":
+        wiki_title = request.POST['title']
+        wiki_content = request.POST['content']
+        if wiki_title == '':
+            message = 'Article name field is blank.'
+            return error(request, message)
+        if not util.get_entry(wiki_title):
+            util.save_entry(wiki_title, wiki_content)
+            return wiki(request, wiki_title)
+        message = 'Article already exist.'
+        return error(request, message)
+    return render(request, "encyclopedia/new.html")
+
+def new_title(request, title):
     if request.method == "POST":
         wiki_title = request.POST['title']
         wiki_content = request.POST['content']
@@ -43,8 +57,10 @@ def new(request):
             return wiki(request, wiki_title)
         message = 'Article already exist.'
         return error(request, message)
+    return render(request, "encyclopedia/new.html", {
+            "wiki_title": title
+        })
 
-    return render(request, "encyclopedia/new.html")
 
 
 def search(request):
