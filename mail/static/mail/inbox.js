@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(result);
     });
     load_mailbox('sent');
-    return false; //&???
+    return false; 
   }
   // By default, load the inbox
   load_mailbox('inbox');
@@ -62,7 +62,6 @@ function load_mailbox(mailbox) {
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 }
 
-
   //Create list of mails
 function load_mail(mail, mailbox) {
   let mailColor = 'alert-light';
@@ -70,15 +69,11 @@ function load_mail(mail, mailbox) {
     mailColor = 'alert-dark';
   }
   console.log(mail)
-
-
   const element = document.createElement('div');
   element.className = `alert alert-light`;
-
-
   const message = document.createElement('div');
   message.className = `alert ${mailColor}`;
-  message.innerHTML = `<b>Sender</b>: ${mail.sender}<div align="right"><b>Time</b>: ${mail.timestamp}</div><br><b>Theme</b>: ${mail.subject}`;
+  message.innerHTML = `<div class="row"><div class="col-sm"><b>Sender</b>: ${mail.sender}</div><div class="col-sm" align="right"><b>Time</b>: ${mail.timestamp}</div></div><br><div style="font-size:18px"><b>Theme</b>: ${mail.subject}</div>`;
   message.addEventListener('click', function() {
     load_mail_info(mail.id);
     console.log('Message clicked!');
@@ -116,7 +111,6 @@ function load_mail(mail, mailbox) {
   document.querySelector('#emails-view').append(element);
 }
 
-
   //Open mail by id: sender, recipients, subject, timestamp, and body
 function load_mail_info(mailId) {
   document.querySelector('#emails-view').style.display = 'none';
@@ -130,7 +124,13 @@ function load_mail_info(mailId) {
     console.log(email)
     const element = document.createElement('div');
     element.className = `alert alert-dark`;
-    element.innerHTML = `sender: ${email.sender}, recipients: ${email.recipients}, Theme: ${email.subject}, Time: ${email.timestamp}, body: ${email.body}`;
+    element.innerHTML = `<div class="row"><div class="col-sm"><b>Sender</b>: ${email.sender}<br><b>Recipients</b>: ${email.recipients}</div><div class="col-sm" align="right"><b>Time</b>: ${email.timestamp}</div></div><hr><div style="font-size:18px class="row"><b>Theme</b>: ${email.subject}</div><div class="alert alert-light"><b>Body</b><br>${email.body}</div>`;
+    const reply = document.createElement('button');
+    reply.className = `btn btn-sm btn-outline-primary archive`;  
+    reply.innerHTML = `Reply`;
+    reply.dataset.id = `${email.id}`
+    reply.addEventListener('click', compose_target_email)
+    element.append(reply);
     document.querySelector('#mail-view').append(element);
   });
 
@@ -157,6 +157,6 @@ function compose_target_email() {
       console.log('1');
       document.querySelector('#compose-subject').value = `Re: ${email.subject}`;
     }
-    document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.recipients} wrote: ${email.body}`;
+    document.querySelector('#compose-body').value = `On ${email.timestamp} ${email.recipients} wrote:\n ${email.body}`;
   });
 }
