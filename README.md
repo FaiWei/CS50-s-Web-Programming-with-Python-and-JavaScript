@@ -1,5 +1,2 @@
-# Project 3 
-
-Mail
-## Web Programming with Python and JavaScript
- 2020
+# Project 3 Mail
+## Web Programming with Python and JavaScript 2020
