@@ -1,9 +1,19 @@
 {% extends "network/layout.html" %}
-
+{% load static %}
 {% block body %}
-    TODO
+
+    <div id="net-feed">
+        <h3 id="net-feed-name">Following and Posts</h3>
+        <div id="net-newpost">
+        </div>   
+    </div>
+
+    <div id="net-profile">
+        <h3>Profile</h3>
+    </div>
 {% endblock %}
 
+
 {% block script %}
-    <script src="{% static 'network/index.js' %}"></script>
+    <script src="{% static 'network/index.js' %}"></script> 
 {% endblock %}
