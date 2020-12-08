@@ -4,16 +4,31 @@
 
     <div id="net-feed">
         <h3 id="net-feed-name">Following and Posts</h3>
+        <div id="net-profile">
+        </div>
+        {% if user.is_authenticated %}
         <div id="net-newpost">
-        </div>   
+            <form class="input-group" id="message-form">
+                {% csrf_token %}
+                <textarea class="form-control" id="message-body" aria-label="With textarea"></textarea>
+                <div class="input-group-append">
+                    <button id="send-message" class="btn btn-primary">Send</button>
+                </div>
+            </form>
+            <hr>
+        </div>  
+        {% endif %}       
+        <div id="net-feed-area">
+        </div>
     </div>
 
-    <div id="net-profile">
-        <h3>Profile</h3>
-    </div>
+
 {% endblock %}
 
 
 {% block script %}
+    <script type="text/javascript">
+        DJANGO_STATIC_URL = '{{ STATIC_URL }}';
+    </script>
     <script src="{% static 'network/index.js' %}"></script> 
 {% endblock %}
