@@ -46,8 +46,6 @@ function LoadProfile(user_id) {
         LoadMessage(NotForAnonim());
     } else {
         LoadFeed('profile', user_id, 1)
-        document.querySelector('#net-newpost').style.display = 'none';
-        document.querySelector('#net-profile').style.display = 'block';
         fetch(`load_profile/${user_id}`)
         .then(response => response.json())
         .then(user_info => {
@@ -118,10 +116,15 @@ function LoadFeed(type, user_id, page) {
 
     // Show compose view and hide other views
     document.querySelector('#net-feed-area').innerHTML = '';
+    document.querySelector('#net-profile').style.display = 'none';
     if (type == 'following') {
         document.querySelector('#net-feed-name').innerHTML = 'Following';
         document.querySelector('#net-newpost').style.display = 'none';
-    } else {
+    } else if (type == 'profile') {
+        document.querySelector('#net-newpost').style.display = 'none';
+        document.querySelector('#net-profile').style.display = 'block';        
+    }
+    else {
         if (type == 'posts') {
             document.querySelector('#net-feed-name').innerHTML = 'All Posts';
         }
@@ -130,7 +133,6 @@ function LoadFeed(type, user_id, page) {
             document.querySelector('#net-newpost').style.display = 'block';
         }
     }
-    document.querySelector('#net-profile').style.display = 'none';
     document.querySelector('#net-feed').style.display = 'block';
     // Fetch messages
     fetch(`/messages/${type}/${user_id}/${page}`)
